@@ -14,10 +14,21 @@
 		}"
 	>
 		<template #body-content>
+			<div class="flex flex-col gap-4 mb-5">
+				<Link
+					doctype="Department"
+					v-model="department"
+					placeholder="Department"
+				/>
+			</div>
+			<label class="block text-base text-center mb-5 text-gray-600">
+				{{ __('OR') }}
+			</label>
 			<div class="flex flex-col gap-4">
 				<Link
 					doctype="User"
 					v-model="student"
+					placeholder="Student"
 					:filters="{ ignore_user_type: 1 }"
 				/>
 			</div>
@@ -30,6 +41,7 @@ import { ref } from 'vue'
 import Link from '@/components/Controls/Link.vue'
 
 const students = defineModel('reloadStudents')
+const department = ref()
 const student = ref()
 const show = defineModel()
 
@@ -49,22 +61,62 @@ const studentResource = createResource({
 				parent: props.batch,
 				parenttype: 'LMS Batch',
 				parentfield: 'students',
-				student: student.value,
+				student: values.student,
 			},
 		}
 	},
 })
 
-const addStudent = (close) => {
-	studentResource.submit(
-		{},
-		{
-			onSuccess() {
-				students.value.reload()
-				close()
-				student.value = null
+const getStudents = createResource({
+	url: 'frappe.client.get_list',
+	makeParams(values) {
+		return {
+			doctype: 'Employee',
+			filters: {
+				department: department.value,
 			},
+			fields: ['user_id'],
 		}
-	)
+	},
+	transform(data) {
+		data.forEach((row, index) => {
+			studentResource.submit(
+				{
+					student: row.user_id,
+				},
+				{
+					onSuccess() {
+						students.value.reload()
+						department.value = null
+						student.value = null
+					},
+				}
+			)
+		})
+		close()
+	},
+	onSuccess() {
+		students.value.reload()
+		close()
+	},
+})
+
+const addStudent = (close) => {
+	if (department.value == null) {
+		studentResource.submit(
+			{
+				student: student.value,
+			},
+			{
+				onSuccess() {
+					students.value.reload()
+					close()
+					student.value = null
+				},
+			}
+		)
+	} else {
+		getStudents.submit()
+	}
 }
 </script>
