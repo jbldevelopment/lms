@@ -295,7 +295,7 @@ const imageResource = createResource({
 	url: 'lms.lms.api.get_file_info',
 	makeParams(values) {
 		return {
-			file_url: values.image,
+			file_url: values?.image,
 		}
 	},
 	auto: false,
