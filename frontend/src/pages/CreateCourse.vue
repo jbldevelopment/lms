@@ -241,7 +241,7 @@ const courseCreationResource = createResource({
 		return {
 			doc: {
 				doctype: 'LMS Course',
-				image: course.course_image.file_url,
+				image: course.course_image?.file_url,
 				...values,
 			},
 		}
@@ -256,7 +256,7 @@ const courseEditResource = createResource({
 			doctype: 'LMS Course',
 			name: values.course,
 			fieldname: {
-				image: course.course_image.file_url,
+				image: course.course_image?.file_url,
 				...course,
 			},
 		}
@@ -295,7 +295,7 @@ const imageResource = createResource({
 	url: 'lms.lms.api.get_file_info',
 	makeParams(values) {
 		return {
-			file_url: values.image,
+			file_url: values?.image,
 		}
 	},
 	auto: false,
